@@ -1,0 +1,55 @@
+name: Python Automation CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Stage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Build
+        run: |
+          python -m py_compile automation.py
+          echo "Build Successful"
+
+  test:
+    name: Test Stage
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      - name: Run Tests
+        run: python -m pytest test_automation.py
+
+  deploy:
+    name: Deployment Stage
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Automation
+        run: |
+          python automation.py
+          echo "Deployment Successful"
